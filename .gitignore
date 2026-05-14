@@ -1,0 +1,20 @@
+# === Terraform ===
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+*.tfvars
+*.tfvars.json
+override.tf
+override.tf.json
+
+# === Airflow (Astro) ===
+.astro/
+.env
+
+# === Sistema / Python ===
+.venv/
+venv/
+__pycache__/
+*.pyc
+.DS_Store
