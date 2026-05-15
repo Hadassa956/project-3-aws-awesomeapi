@@ -42,11 +42,13 @@ resource "aws_iam_policy" "glue_custom_policy" {
         Action = [
           "s3:GetObject",
           "s3:PutObject",
-          "s3:ListBucket"
+          "s3:ListBucket",
+          "s3:DeleteObject"
         ]
         Resource = [
-          "arn:aws:s3:::aws-awesomeapi-bucket/*",
-          "arn:aws:s3:::aws-awesomeapi-gold-bucket/*"
+          aws_s3_bucket.data_lake.arn, # Referencing the ARN of the S3 bucket created above to allow access to the entire bucket
+          "${aws_s3_bucket.data_lake.arn}/*" # Referencing the dinamic ARN of the S3 bucket with a wildcard to allow access to all objects within the bucket
+
         ]
       }
     ]
@@ -66,17 +68,29 @@ resource "aws_s3_bucket" "data_lake" {
     force_destroy = true
 }
 
-resource "aws_s3_bucket" "data_lake_bronze" {
-    bucket = "aws_s3_bucket.data_lake-072-bronze"
-    force_destroy = true
+resource "aws_s3_bucket_versioning" "data_lake_versioning" {
+  bucket = aws_s3_bucket.data_lake.id
+
+  versioning_configuration {
+    status = "Enabled"
+  }
 }
 
-resource "aws_s3_bucket" "data_lake_silver" {
-    bucket = "aws_s3_bucket.data_lake-072-silver"
-    force_destroy = true
+# Bronze layer: Raw data, unprocessed, directly from the source.
+resource "aws_s3_object" "data_lake_bronze" {
+  bucket = aws_s3_bucket.data_lake.id # Here you reference the S3 bucket created above using its ID to create the object in the same bucket.
+  key    = "bronze/" #create a folder bronze and the file name"
+  content_type = "application/x-directory" # To advise that this is a directory, not a file and the s3 consider it as a folder.
 }
-
-resource "aws_s3_bucket" "data_lake_gold" {
-    bucket = "aws_s3_bucket.data_lake-072-gold"
-    force_destroy = true
+# Silver layer: Cleaned and transformed data, ready for analysis.
+resource "aws_s3_object" "data_lake_silver" {
+    bucket = aws_s3_bucket.data_lake.id
+    key    = "silver/"
+    content_type = "application/x-directory"
+}
+# Gold layer: Curated and enriched data, optimized for business intelligence and reporting.
+resource "aws_s3_object" "data_lake_gold" {
+    bucket = aws_s3_bucket.data_lake.id
+    key    = "gold/"
+    content_type = "application/x-directory"
 }
