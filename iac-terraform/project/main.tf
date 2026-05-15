@@ -1,6 +1,6 @@
 #-------------IAM----------------
 resource "aws_iam_role" "glue_service_role" {
-name = "${var.project_name}-glue-service-role"
+  name = "${var.project_name}-glue-service-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -46,14 +46,14 @@ resource "aws_iam_policy" "glue_custom_policy" {
           "s3:DeleteObject"
         ]
         Resource = [
-          aws_s3_bucket.data_lake.arn, # Referencing the ARN of the S3 bucket created above to allow access to the entire bucket
+          aws_s3_bucket.data_lake.arn,       # Referencing the ARN of the S3 bucket created above to allow access to the entire bucket
           "${aws_s3_bucket.data_lake.arn}/*" # Referencing the dinamic ARN of the S3 bucket with a wildcard to allow access to all objects within the bucket
 
         ]
       }
     ]
   })
-  
+
 }
 
 #----------anexing the custom policy to the role----------------
@@ -64,8 +64,8 @@ resource "aws_iam_role_policy_attachment" "glue_custom_policy_attachment" {
 
 #------------------------s3 buckets------------------------
 resource "aws_s3_bucket" "data_lake" {
-    bucket = "${var.project_name}-data-lake-072"
-    force_destroy = true
+  bucket        = "${var.project_name}-data-lake-072"
+  force_destroy = true
 }
 
 resource "aws_s3_bucket_versioning" "data_lake_versioning" {
@@ -78,19 +78,38 @@ resource "aws_s3_bucket_versioning" "data_lake_versioning" {
 
 # Bronze layer: Raw data, unprocessed, directly from the source.
 resource "aws_s3_object" "data_lake_bronze" {
-  bucket = aws_s3_bucket.data_lake.id # Here you reference the S3 bucket created above using its ID to create the object in the same bucket.
-  key    = "bronze/" #create a folder bronze and the file name"
-  content_type = "application/x-directory" # To advise that this is a directory, not a file and the s3 consider it as a folder.
+  bucket       = aws_s3_bucket.data_lake.id # Here you reference the S3 bucket created above using its ID to create the object in the same bucket.
+  key          = "bronze/"                  #create a folder bronze and the file name"
+  content_type = "application/x-directory"  # To advise that this is a directory, not a file and the s3 consider it as a folder.
 }
 # Silver layer: Cleaned and transformed data, ready for analysis.
 resource "aws_s3_object" "data_lake_silver" {
-    bucket = aws_s3_bucket.data_lake.id
-    key    = "silver/"
-    content_type = "application/x-directory"
+  bucket       = aws_s3_bucket.data_lake.id
+  key          = "silver/"
+  content_type = "application/x-directory"
 }
 # Gold layer: Curated and enriched data, optimized for business intelligence and reporting.
 resource "aws_s3_object" "data_lake_gold" {
-    bucket = aws_s3_bucket.data_lake.id
-    key    = "gold/"
-    content_type = "application/x-directory"
+  bucket       = aws_s3_bucket.data_lake.id
+  key          = "gold/"
+  content_type = "application/x-directory"
 }
+
+#------------------------glue catalog------------------------
+resource "aws_glue_catalog_database" "data_lake_db" {
+  name        = "${var.project_name}_data_lake_db"
+  description = "Glue Catalog Database for the Data Lake"
+}
+
+#------------------------glue crawler-bronze layer------------------------
+resource "aws_glue_crawler" "bronze_crawler" {
+  name          = "${var.project_name}-bronze-crawler"
+  database_name = aws_glue_catalog_database.data_lake_db.name
+  role          = aws_iam_role.glue_service_role.arn #It takes the ARN of the IAM role created above to allow the crawler to access the necessary resources.
+
+  s3_target {
+    path = "s3://${aws_s3_bucket.data_lake.bucket}/bronze/"
+  }
+  description = "Glue Crawler for the Bronze layer raw data"
+}
+
