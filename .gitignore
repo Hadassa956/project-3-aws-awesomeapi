@@ -1,20 +1,114 @@
-# === Terraform ===
-.terraform/
-*.tfstate
-*.tfstate.*
-crash.log
-*.tfvars
-*.tfvars.json
-override.tf
-override.tf.json
+# ==============================================================================
+# APACHE AIRFLOW SPECIFIC
+# ==============================================================================
+# Local execution artifacts & databases
+airflow.db
+airflow-webserver.pid
+airflow-worker.pid
+airflow-scheduler.pid
+airflow-triggerer.pid
+airflow_settings.yaml
 
-# === Airflow (Astro) ===
+# Airflow folders generated locally
+airflow/logs/
+airflow/dags/.astro/
+airflow/plugins/.astro/
 .astro/
-.env
+logs/
 
-# === Sistema / Python ===
-.venv/
-venv/
+# Airflow configurations (ignore local configs if you use env vars)
+airflow.cfg
+unittests.cfg
+
+# ==============================================================================
+# AWS SPECIFIC (GLUE, SAM, CDK, SAGEMAKER)
+# ==============================================================================
+.aws-sam/
+.cdk.staging/
+cdk.out/
+.aws/
+credentials
+config
+.glue/
+*.egg-info/
+dist/
+build/
+.ipynb_checkpoints/
+.virtual_documents/
+
+# ==============================================================================
+# DATASOURCE & BIG DATA FILES
+# ==============================================================================
+*.csv
+*.json
+*.xml
+*.txt
+*.xlsx
+*.xls
+*.db
+*.sqlite
+*.sqlite3
+*.parquet
+*.orc
+*.avro
+_delta_log/
+
+# ==============================================================================
+# SECURITY & CONFIGURATIONS (SENSITIVE DATA)
+# ==============================================================================
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.json-credentials
+*creds*
+*credentials*
+
+# ==============================================================================
+# ORCHESTRATION, DBT & LOGS
+# ==============================================================================
+*.log
+*.logs
+target/
+dbt_packages/
+
+# ==============================================================================
+# PYTHON & ENVIRONMENTS
+# ==============================================================================
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+.Python
+env/
+awe/
+.env/
+.awe/
+.pytest_cache/
+
+# ==============================================================================
+# COMPRESSED & PACKAGED FILES
+# ==============================================================================
+*.zip
+*.tar
+*.gz
+*.rar
+*.7z
+*.jar
+node_modules/
+
+# ==============================================================================
+# OPERATING SYSTEMS
+# ==============================================================================
 .DS_Store
+._*
+Thumbs.db
+Desktop.ini
+
+
+.dockerignore
+Dockerfile
+docker-compose.yml.terraform/
+*.tfstate
+*.tfstate.*
