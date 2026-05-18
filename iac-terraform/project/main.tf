@@ -113,3 +113,26 @@ resource "aws_glue_crawler" "bronze_crawler" {
   description = "Glue Crawler for the Bronze layer raw data"
 }
 
+#------------------------glue crawler-silver layer------------------------
+resource "aws_glue_crawler" "silver_crawler" {
+  name          = "${var.project_name}-silver-crawler"
+  database_name = aws_glue_catalog_database.data_lake_db.name
+  role          = aws_iam_role.glue_service_role.arn #It takes the ARN of the IAM role created above to allow the crawler to access the necessary resources.
+
+  s3_target {
+    path = "s3://${aws_s3_bucket.data_lake.bucket}/silver/"
+  }
+  description = "Glue Crawler for the Silver layer cleaned data"
+}
+
+#------------------------glue crawler-gold layer------------------------
+resource "aws_glue_crawler" "gold_crawler" {
+  name          = "${var.project_name}-gold-crawler"
+  database_name = aws_glue_catalog_database.data_lake_db.name
+  role          = aws_iam_role.glue_service_role.arn #It takes the ARN of the IAM role created above to allow the crawler to access the necessary resources.
+
+  s3_target {
+    path = "s3://${aws_s3_bucket.data_lake.bucket}/gold/"
+  }
+  description = "Glue Crawler for the Gold layer curated data"
+}
