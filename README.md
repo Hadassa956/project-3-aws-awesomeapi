@@ -90,25 +90,15 @@ gold/year=2026/month=05/day=18/
 # Pipeline Flow
 
 ```text
-AwesomeAPI
-   ↓
-Airflow DAG
-   ↓
-S3 Bronze Layer
-   ↓
-Glue Crawler
-   ↓
-S3 Silver Layer
-   ↓
-Glue Crawler
-   ↓
-S3 Gold Layer
-   ↓
-Glue Crawler
-   ↓
-Glue Data Catalog
-   ↓
-Amazon Athena
+[AwesomeAPI] ──(Airflow)──► [S3 Bronze Layer] ──(Airflow/PyArrow)──► [S3 Silver Layer] ──(Airflow/PyArrow)──► [S3 Gold Layer]
+                                     │                                         │                                       │
+                              (Glue Crawler)                            (Glue Crawler)                          (Glue Crawler)
+                                     │                                         │                                       │
+                                     ▼                                         ▼                                       ▼
+                              [Data Catalog]                            [Data Catalog]                          [Data Catalog]
+                                                                                                                       │
+                                                                                                                       ▼
+                                                                                                                [Amazon Athena]
 ```
 
 ---
@@ -143,7 +133,7 @@ Infrastructure resources created with Terraform:
 
 ```sql
 SELECT *
-FROM awesomeapi_gold
+FROM gold
 WHERE volatility = 'HIGH';
 ```
 
@@ -175,44 +165,3 @@ Possible future enhancements:
 * Lake Formation governance
 * Incremental processing strategy
 * Monitoring and alerting
-
----
-
-# LinkedIn Post
-
-I’ve just finished building an end-to-end AWS data engineering pipeline using a Medallion Architecture approach.
-
-The project extracts real-time foreign exchange quotation data from AwesomeAPI, orchestrates the entire workflow with Apache Airflow, stores the data in Amazon S3 across Bronze, Silver, and Gold layers, catalogs the datasets with AWS Glue Crawlers, and makes them queryable through Amazon Athena.
-
-The infrastructure was provisioned with Terraform.
-
-Main concepts explored in the project:
-
-* Apache Airflow orchestration
-* AWS Glue Crawlers and Data Catalog
-* Amazon Athena
-* S3 partitioning strategies
-* Parquet optimization
-* Medallion Architecture
-* Infrastructure as Code
-* IAM least privilege principles
-* Cloud-native ETL design
-
-One of the most valuable parts of the project was dealing with real cloud engineering issues during implementation:
-
-* AWS region configuration
-* Glue crawler behavior
-* schema inference
-* partitioning structure
-* IAM permissions
-* Athena catalog integration
-
-Building the pipeline itself was important, but understanding the operational behavior of AWS services was what made the experience especially valuable.
-
-Repository:
-
-[add your GitHub repository here]
-
-Architecture diagram:
-
-[add architecture image here]
